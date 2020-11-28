@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -27,6 +28,8 @@ func (f *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 			for name := range m {
 				names = append(names, string(name))
 			}
+			// sort for deterministic error message
+			sort.Strings(names)
 			return strings.Join(names, " ")
 		}()
 		return fmt.Errorf("expected a single field for FieldDefinition but got %d: %s", fieldCount, fields)

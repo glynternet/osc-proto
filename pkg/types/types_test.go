@@ -33,8 +33,9 @@ blur:
 func TestMultipleKeysInSingleFieldYamlUnmarshalShouldFail(t *testing.T) {
 	in := `
 blur:
-  - enabled: bool
-    foo: bar`
+  - foo: bar
+    enabled: bool
+`
 
 	var out types.Types
 	err := yaml.UnmarshalStrict([]byte(in), &out)
