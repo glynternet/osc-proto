@@ -37,7 +37,6 @@ blur:
     enabled: bool
 `
 
-	var out types.Types
-	err := yaml.UnmarshalStrict([]byte(in), &out)
+	err := yaml.UnmarshalStrict([]byte(in), &types.Types{})
 	require.EqualError(t, err, "expected a single field for FieldDefinition but got 2: enabled foo")
 }
