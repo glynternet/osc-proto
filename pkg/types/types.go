@@ -16,7 +16,7 @@ type FieldDefinition struct {
 	FieldType
 }
 
-func (f FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (f *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	m := make(map[FieldName]FieldType)
 	if err := unmarshal(m); err != nil {
 		return err
@@ -30,6 +30,12 @@ func (f FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 			return strings.Join(names, " ")
 		}()
 		return fmt.Errorf("expected a single field for FieldDefinition but got %d: %s", fieldCount, fields)
+	}
+	for name, fieldType := range m {
+		*f = FieldDefinition{
+			FieldName: name,
+			FieldType: fieldType,
+		}
 	}
 	return nil
 }
