@@ -43,7 +43,7 @@ type Foo struct {
 
 func (f Foo) MessageArgs() []interface{} {
 	return []interface{
-		f.FieldFoo
+		f.FieldFoo,
 	}
 }
 `
