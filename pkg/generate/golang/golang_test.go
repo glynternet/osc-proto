@@ -3,6 +3,7 @@ package golang_test
 import (
 	"testing"
 
+	"github.com/glynternet/osc-proto/pkg/generate/generatetest"
 	"github.com/glynternet/osc-proto/pkg/generate/golang"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func TestEmptyTypesShouldYieldEmptyFile(t *testing.T) {
 	in := types.Types{}
-	var expected []byte
+	var expected map[string][]byte
 	out, err := golang.Generator{}.Generate(in)
 	require.NoError(t, err)
 	assert.Equal(t, expected, out)
@@ -48,5 +49,7 @@ func (f Foo) MessageArgs() []interface{} {
 `
 	out, err := golang.Generator{Package: "packageBar"}.Generate(in)
 	require.NoError(t, err)
-	assert.Equal(t, expected, string(out))
+	generatetest.AssertEqualContentLayout(t, map[string]string{
+		"foo.go": expected,
+	}, out)
 }

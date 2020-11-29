@@ -33,15 +33,15 @@ type Generator struct {
 	Package string
 }
 
-func (g Generator) Generate(typesToGenerate types.Types) ([]byte, error) {
+func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, error) {
 	if len(typesToGenerate) == 0 {
 		return nil, nil
 	}
 	if len(typesToGenerate) > 1 {
 		return nil, errors.New("only generating for a single type is supported currently")
 	}
-	var out bytes.Buffer
 	for name, fields := range typesToGenerate {
+		var out bytes.Buffer
 		if err := tmpl.Execute(&out, struct {
 			Package            string
 			TypeName           types.TypeName
@@ -57,6 +57,9 @@ func (g Generator) Generate(typesToGenerate types.Types) ([]byte, error) {
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
 		}
+		return map[string][]byte{
+			string(name) + ".go": out.Bytes(),
+		}, nil
 	}
-	return out.Bytes(), nil
+	return nil, errors.New("should be unreachable")
 }
