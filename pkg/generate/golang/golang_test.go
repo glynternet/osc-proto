@@ -38,12 +38,12 @@ func TestSingleTypeShouldYieldResult(t *testing.T) {
 	const expected = `package packageBar
 
 type Foo struct {
-	fieldFoo fieldFooType
+	FieldFoo fieldFooType
 }
 
 func (f Foo) MessageArgs() []interface{} {
 	return []interface{
-		f.fieldFoo
+		f.FieldFoo
 	}
 }
 `

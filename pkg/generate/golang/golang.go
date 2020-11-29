@@ -53,7 +53,7 @@ func (g Generator) Generate(types types.Types) ([]byte, error) {
 			Package:            g.Package,
 			TypeName:           types2.TypeName(strings.Title(string(name))),
 			TypeMethodReceiver: strings.ToLower(string(name[0])),
-			FieldName:          fields[0].FieldName,
+			FieldName:          types2.FieldName(strings.Title(string(fields[0].FieldName))),
 			FieldType:          fields[0].FieldType,
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
