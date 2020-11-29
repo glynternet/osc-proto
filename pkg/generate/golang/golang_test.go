@@ -3,6 +3,7 @@ package golang_test
 import (
 	"testing"
 
+	"github.com/glynternet/osc-proto/pkg/generate/generatetest"
 	"github.com/glynternet/osc-proto/pkg/generate/golang"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +49,7 @@ func (f Foo) MessageArgs() []interface{} {
 `
 	out, err := golang.Generator{Package: "packageBar"}.Generate(in)
 	require.NoError(t, err)
-	assert.Equal(t, map[string][]byte{
-		"foo.go": []byte(expected),
+	generatetest.AssertEqualContentLayout(t, map[string]string{
+		"foo.go": expected,
 	}, out)
 }
