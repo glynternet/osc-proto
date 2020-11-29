@@ -17,8 +17,8 @@ type {{.TypeName}} struct {
 }
 
 func ({{.TypeMethodReceiver}} {{.TypeName}}) MessageArgs() []interface{} {
-	return []interface{
-		{{.TypeMethodReceiver}}.{{.FieldName}}
+	return []interface{}{
+		{{.TypeMethodReceiver}}.{{.FieldName}},
 	}
 }
 `

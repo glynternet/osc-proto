@@ -34,7 +34,6 @@ func TestSingleTypeShouldYieldResult(t *testing.T) {
 			FieldType: "fieldFooType",
 		}},
 	}
-	out, err := golang.Generator{Package: "packageBar"}.Generate(in)
 	const expected = `package packageBar
 
 type Foo struct {
@@ -42,11 +41,12 @@ type Foo struct {
 }
 
 func (f Foo) MessageArgs() []interface{} {
-	return []interface{
-		f.FieldFoo
+	return []interface{}{
+		f.FieldFoo,
 	}
 }
 `
+	out, err := golang.Generator{Package: "packageBar"}.Generate(in)
 	require.NoError(t, err)
 	assert.Equal(t, expected, string(out))
 }
