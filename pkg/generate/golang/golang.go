@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	"github.com/glynternet/osc-proto/pkg/types"
-	types2 "github.com/glynternet/osc-proto/pkg/types"
 	"github.com/pkg/errors"
 )
 
@@ -34,26 +33,26 @@ type Generator struct {
 	Package string
 }
 
-func (g Generator) Generate(types types.Types) ([]byte, error) {
-	if len(types) == 0 {
+func (g Generator) Generate(typesToGenerate types.Types) ([]byte, error) {
+	if len(typesToGenerate) == 0 {
 		return nil, nil
 	}
-	if len(types) > 1 {
+	if len(typesToGenerate) > 1 {
 		return nil, errors.New("only generating for a single type is supported currently")
 	}
 	var out bytes.Buffer
-	for name, fields := range types {
+	for name, fields := range typesToGenerate {
 		if err := tmpl.Execute(&out, struct {
 			Package            string
-			TypeName           types2.TypeName
+			TypeName           types.TypeName
 			TypeMethodReceiver string
-			FieldName          types2.FieldName
-			FieldType          types2.FieldType
+			FieldName          types.FieldName
+			FieldType          types.FieldType
 		}{
 			Package:            g.Package,
-			TypeName:           types2.TypeName(strings.Title(string(name))),
+			TypeName:           types.TypeName(strings.Title(string(name))),
 			TypeMethodReceiver: strings.ToLower(string(name[0])),
-			FieldName:          types2.FieldName(strings.Title(string(fields[0].FieldName))),
+			FieldName:          types.FieldName(strings.Title(string(fields[0].FieldName))),
 			FieldType:          fields[0].FieldType,
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
