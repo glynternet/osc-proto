@@ -11,7 +11,7 @@ import (
 
 func TestEmptyTypesShouldYieldEmptyFile(t *testing.T) {
 	in := types.Types{}
-	var expected []byte
+	var expected map[string][]byte
 	out, err := golang.Generator{}.Generate(in)
 	require.NoError(t, err)
 	assert.Equal(t, expected, out)
@@ -48,5 +48,7 @@ func (f Foo) MessageArgs() []interface{} {
 `
 	out, err := golang.Generator{Package: "packageBar"}.Generate(in)
 	require.NoError(t, err)
-	assert.Equal(t, expected, string(out))
+	assert.Equal(t, map[string][]byte{
+		"foo.go": []byte(expected),
+	}, out)
 }
