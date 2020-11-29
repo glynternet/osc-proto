@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 
 	"github.com/glynternet/osc-proto/pkg/generate"
-	"github.com/glynternet/osc-proto/pkg/generate/csharp"
 	"github.com/glynternet/osc-proto/pkg/generate/golang"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/glynternet/pkg/log"
@@ -37,8 +36,7 @@ func generateTypesRun(logger log.Logger) func(_ *cobra.Command, args []string) e
 
 		allFiles := make(map[string][]byte)
 		for _, generator := range []generate.Generator{
-			golang.Generator{Package: "hmmm"},
-			csharp.Generator{Namespace: "hmmalso"},
+			golang.Generator{Package: "types"},
 		} {
 			outFiles, err := generator.Generate(typesDeserialised)
 			if err != nil {
