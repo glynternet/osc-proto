@@ -39,8 +39,18 @@ func TestSingleTypeShouldYieldResult(t *testing.T) {
 
 func FooMessageArgs(fieldFoo bool) []interface{} {
 	return []interface{}{
-		value.BoolInt32(fieldFoo).Int32(),
+		boolInt32(fieldFoo),
 	}
+}
+
+// boolInt32 returns an int32 representation of a bool.
+// This is required for supporting OSC frameworks that
+// don't support a boolean primitive
+func boolInt32(value bool) int32 {
+	if value {
+		return 1
+	}
+	return 0
 }
 `
 	out, err := golang.Generator{Package: "packageBar"}.Generate(in)

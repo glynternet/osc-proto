@@ -15,8 +15,18 @@ var tmpl = func() *template.Template {
 
 func {{.TypeName}}MessageArgs({{.ArgName}} bool) []interface{} {
 	return []interface{}{
-		{{.TypeMethodReceiver}},
+		{{.GetFieldArg}},
 	}
+}
+
+// boolInt32 returns an int32 representation of a bool.
+// This is required for supporting OSC frameworks that
+// don't support a boolean primitive
+func boolInt32(value bool) int32 {
+	if value {
+		return 1
+	}
+	return 0
 }
 `
 	t, err := template.New("golang").Parse(tmplStr)
@@ -41,15 +51,15 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		var out bytes.Buffer
 		argName := string(fields[0].FieldName)
 		if err := tmpl.Execute(&out, struct {
-			Package            string
-			TypeName           types.TypeName
-			ArgName            string
-			TypeMethodReceiver string
+			Package     string
+			TypeName    types.TypeName
+			ArgName     string
+			GetFieldArg string
 		}{
-			Package:            g.Package,
-			TypeName:           types.TypeName(strings.Title(string(name))),
-			ArgName:            argName,
-			TypeMethodReceiver: boolFieldArg(argName),
+			Package:     g.Package,
+			TypeName:    types.TypeName(strings.Title(string(name))),
+			ArgName:     argName,
+			GetFieldArg: boolFieldArg(argName),
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
 		}
@@ -62,5 +72,5 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 
 // TODO(glynternet): upgrade to support receiving bools in UnityOSC so we don't have to do this
 func boolFieldArg(argName string) string {
-	return fmt.Sprintf("value.BoolInt32(%s).Int32()", argName)
+	return fmt.Sprintf("boolInt32(%s)", argName)
 }
