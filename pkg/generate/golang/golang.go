@@ -2,6 +2,7 @@ package golang
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"text/template"
 
@@ -12,13 +13,9 @@ import (
 var tmpl = func() *template.Template {
 	const tmplStr = `package {{.Package}}
 
-type {{.TypeName}} struct {
-	{{.FieldName}} {{.FieldType}}
-}
-
-func ({{.TypeMethodReceiver}} {{.TypeName}}) MessageArgs() []interface{} {
+func {{.TypeName}}MessageArgs({{.ArgName}} bool) []interface{} {
 	return []interface{}{
-		{{.TypeMethodReceiver}}.{{.FieldName}},
+		{{.TypeMethodReceiver}},
 	}
 }
 `
@@ -42,18 +39,17 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	}
 	for name, fields := range typesToGenerate {
 		var out bytes.Buffer
+		argName := string(fields[0].FieldName)
 		if err := tmpl.Execute(&out, struct {
 			Package            string
 			TypeName           types.TypeName
+			ArgName            string
 			TypeMethodReceiver string
-			FieldName          types.FieldName
-			FieldType          types.FieldType
 		}{
 			Package:            g.Package,
 			TypeName:           types.TypeName(strings.Title(string(name))),
-			TypeMethodReceiver: strings.ToLower(string(name[0])),
-			FieldName:          types.FieldName(strings.Title(string(fields[0].FieldName))),
-			FieldType:          fields[0].FieldType,
+			ArgName:            argName,
+			TypeMethodReceiver: boolFieldArg(argName),
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
 		}
@@ -62,4 +58,9 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		}, nil
 	}
 	return nil, errors.New("should be unreachable")
+}
+
+// TODO(glynternet): upgrade to support receiving bools in UnityOSC so we don't have to do this
+func boolFieldArg(argName string) string {
+	return fmt.Sprintf("value.BoolInt32(%s).Int32()", argName)
 }
