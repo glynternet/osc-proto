@@ -37,13 +37,9 @@ func TestSingleTypeShouldYieldResult(t *testing.T) {
 	}
 	const expected = `package packageBar
 
-type Foo struct {
-	FieldFoo fieldFooType
-}
-
-func (f Foo) MessageArgs() []interface{} {
+func FooMessageArgs(fieldFoo bool) []interface{} {
 	return []interface{}{
-		f.FieldFoo,
+		value.BoolInt32(fieldFoo).Int32(),
 	}
 }
 `
