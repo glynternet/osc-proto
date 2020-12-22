@@ -26,7 +26,7 @@ func TestNonboolFieldTypeShouldYieldError(t *testing.T) {
 		}},
 	}
 	_, err := csharp.Generator{Namespace: "foo"}.Generate(in)
-	require.EqualError(t, err, "type:foo contains non-bool field type:nonbool for field:fieldFoo")
+	require.EqualError(t, err, "type:foo has unsupported field type:nonbool for field:fieldFoo")
 }
 
 func TestSingleTypeSingleFieldShouldYieldResult(t *testing.T) {
@@ -92,7 +92,7 @@ func TestSingleTypeMultipleFieldsShouldYieldResult(t *testing.T) {
 			FieldType: "bool",
 		}, {
 			FieldName: "fieldBar",
-			FieldType: "bool",
+			FieldType: "int32",
 		}},
 	}
 	out, err := csharp.Generator{
@@ -109,9 +109,9 @@ namespace namespaceBar {
 
     public readonly struct Foo {
         private readonly bool _fieldFoo;
-        private readonly bool _fieldBar;
+        private readonly int _fieldBar;
 
-        public Foo(bool fieldFoo, bool fieldBar) {
+        public Foo(bool fieldFoo, int fieldBar) {
             _fieldFoo = fieldFoo;
             _fieldBar = fieldBar;
         }
@@ -120,7 +120,7 @@ namespace namespaceBar {
             return _fieldFoo;
         }
 
-        public bool FieldBar() {
+        public int FieldBar() {
             return _fieldBar;
         }
     }
@@ -128,13 +128,13 @@ namespace namespaceBar {
     public class FooUnmarshaller : IMessageUnmarshaller<Foo> {
 
         // <fieldFoo:bool>
-        // <fieldBar:bool>
+        // <fieldBar:int32>
         public Foo Unmarshal(List<object> data) {
             if (data.Count != 2) {
                 throw new ArgumentException($"Expected 2 item in arg list but got {data.Count}");
             }
             var fieldFoo = ParseBool(data[0].ToString());
-            var fieldBar = ParseBool(data[1].ToString());
+            var fieldBar = int.Parse(data[1].ToString());
             return new Foo(fieldFoo, fieldBar);
         }
 

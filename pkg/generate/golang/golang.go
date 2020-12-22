@@ -59,20 +59,25 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		Args             []argTmplVars
 	}
 
+	fieldArgFuncs := fieldArgFuncs()
+
 	var typeTmplVarss []typeTmplVars
 	for _, name := range typesToGenerate.SortedNames() {
-		tName := types.TypeName(name)
-		ttFields := typesToGenerate[tName]
+		fields := typesToGenerate[types.TypeName(name)]
 		var fieldsArgTmplVarss []argTmplVars
-		for _, field := range ttFields {
+		for _, field := range fields {
+			getFieldArg, ok := fieldArgFuncs[field.FieldType]
+			if !ok {
+				return nil, fmt.Errorf("type:%s has unsupported field type:%s for field:%s", name, field.FieldType, field.FieldName)
+			}
 			fieldsArgTmplVarss = append(fieldsArgTmplVarss, argTmplVars{
 				ArgName:     string(field.FieldName),
-				GetFieldArg: boolFieldArg(string(field.FieldName)),
+				GetFieldArg: getFieldArg(string(field.FieldName)),
 			})
 		}
 		typeTmplVarss = append(typeTmplVarss, typeTmplVars{
-			TypeName:         types.TypeName(strings.Title(string(name))),
-			MethodParameters: methodParametersString(ttFields),
+			TypeName:         types.TypeName(strings.Title(name)),
+			MethodParameters: methodParametersString(fields),
 			Args:             fieldsArgTmplVarss,
 		})
 	}
@@ -94,19 +99,23 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		return nil, errors.Wrap(err, "executing template")
 	}
 
-	return map[string][]byte{string(g.Package) + ".go": out.Bytes()}, nil
+	return map[string][]byte{g.Package + ".go": out.Bytes()}, nil
 }
 
 func methodParametersString(fields types.TypeFields) string {
 	var params []string
 	for _, field := range fields {
 		// TODO(glynternet): support more than bool :joy:
-		params = append(params, string(field.FieldName)+" bool")
+		params = append(params, string(field.FieldName)+" "+string(field.FieldType))
 	}
 	return strings.Join(params, ", ")
 }
 
-// TODO(glynternet): upgrade to support receiving bools in UnityOSC so we don't have to do this
-func boolFieldArg(argName string) string {
-	return fmt.Sprintf("boolInt32(%s)", argName)
+func fieldArgFuncs() map[types.FieldType]func(string) string {
+	return map[types.FieldType]func(string) string{
+		// TODO(glynternet): upgrade to support receiving bools in UnityOSC
+		//   so we don't have to do this as a boolInt32
+		"bool":  func(argName string) string { return fmt.Sprintf("boolInt32(%s)", argName) },
+		"int32": func(argName string) string { return argName },
+	}
 }

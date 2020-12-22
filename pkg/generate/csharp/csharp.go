@@ -26,19 +26,19 @@ namespace {{.Namespace}} {
 {{range .Fields}}            _{{.FieldName}} = {{.FieldName}};
 {{end}}        }
 {{range .Fields}}
-        public bool {{.FieldNameGetter}}() {
+        public {{.FieldType}} {{.FieldNameGetter}}() {
             return _{{.FieldName}};
         }
 {{end}}    }
 
     public class {{.TypeName}}Unmarshaller : IMessageUnmarshaller<{{.TypeName}}> {
 
-{{range .Fields}}        // <{{.FieldName}}:{{.FieldType}}>
+{{range .Fields}}        // <{{.FieldName}}:{{.OriginalFieldType}}>
 {{end}}        public {{.TypeName}} Unmarshal(List<object> data) {
             if (data.Count != {{len .Fields}}) {
                 throw new ArgumentException($"Expected {{len .Fields}} item in arg list but got {data.Count}");
             }
-{{range $i, $field := .Fields}}            var {{.FieldName}} = Parse{{.FieldTypeParseMethodSuffix}}(data[{{$i}}].ToString());
+{{range $i, $field := .Fields}}            var {{.FieldName}} = {{.FieldTypeParseFunc}}(data[{{$i}}].ToString());
 {{end}}            return new {{.TypeName}}({{.UnmarshalledConstructorCallArgs}});
         }
 
@@ -71,10 +71,11 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	}
 
 	type fieldTemplateVars struct {
-		FieldName                  types.FieldName
-		FieldNameGetter            string
-		FieldType                  types.FieldType
-		FieldTypeParseMethodSuffix string
+		FieldName          types.FieldName
+		FieldNameGetter    string
+		OriginalFieldType  types.FieldType
+		FieldType          string
+		FieldTypeParseFunc string
 	}
 
 	type typeTemplateVars struct {
@@ -83,25 +84,34 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		UnmarshalledConstructorCallArgs string
 		Fields                          []fieldTemplateVars
 	}
+
+	convertedFieldTypes := convertedFieldTypes()
+	parseDataFieldFuncs := parseDataFieldFuncs()
 	var ttvs []typeTemplateVars
 	for _, name := range typesToGenerate.SortedNames() {
 		var ftvs []fieldTemplateVars
 		fields := typesToGenerate[types.TypeName(name)]
 		for _, field := range fields {
-			if field.FieldType != "bool" {
-				return nil, fmt.Errorf("type:%s contains non-bool field type:%s for field:%s", name, field.FieldType, field.FieldName)
+			convertedType, ok := convertedFieldTypes[field.FieldType]
+			if !ok {
+				return nil, fmt.Errorf("type:%s has unsupported field type:%s for field:%s", name, field.FieldType, field.FieldName)
+			}
+			parseFieldFunc, ok := parseDataFieldFuncs[field.FieldType]
+			if !ok {
+				return nil, fmt.Errorf("type:%s has unsupported field type:%s for field:%s", name, field.FieldType, field.FieldName)
 			}
 			ftvs = append(ftvs, fieldTemplateVars{
-				FieldName:                  field.FieldName,
-				FieldNameGetter:            strings.Title(string(field.FieldName)),
-				FieldType:                  field.FieldType,
-				FieldTypeParseMethodSuffix: strings.Title(string(field.FieldType)),
+				FieldName:          field.FieldName,
+				FieldNameGetter:    strings.Title(string(field.FieldName)),
+				OriginalFieldType:  field.FieldType,
+				FieldType:          convertedType,
+				FieldTypeParseFunc: parseFieldFunc,
 			})
 		}
 
 		ttvs = append(ttvs, typeTemplateVars{
-			TypeName:                        types.TypeName(strings.Title(string(name))),
-			ConstructorParameters:           constructorParameters(fields),
+			TypeName:                        types.TypeName(strings.Title(name)),
+			ConstructorParameters:           constructorParameters(convertedFieldTypes, fields),
 			UnmarshalledConstructorCallArgs: unmarshalledConstructorCallArgs(fields),
 			Fields:                          ftvs,
 		})
@@ -124,14 +134,14 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		return nil, errors.Wrap(err, "executing template")
 	}
 	return map[string][]byte{
-		string(g.Namespace) + ".cs": out.Bytes(),
+		g.Namespace + ".cs": out.Bytes(),
 	}, nil
 }
 
-func constructorParameters(fields types.TypeFields) string {
+func constructorParameters(convertedFieldTypes map[types.FieldType]string, fields types.TypeFields) string {
 	var params []string
 	for _, field := range fields {
-		params = append(params, string(field.FieldType)+" "+string(field.FieldName))
+		params = append(params, convertedFieldTypes[field.FieldType]+" "+string(field.FieldName))
 	}
 	return strings.Join(params, ", ")
 }
@@ -142,4 +152,18 @@ func unmarshalledConstructorCallArgs(fields types.TypeFields) string {
 		args = append(args, string(field.FieldName))
 	}
 	return strings.Join(args, ", ")
+}
+
+func convertedFieldTypes() map[types.FieldType]string {
+	return map[types.FieldType]string{
+		"bool":  "bool",
+		"int32": "int",
+	}
+}
+
+func parseDataFieldFuncs() map[types.FieldType]string {
+	return map[types.FieldType]string{
+		"bool":  "ParseBool",
+		"int32": "int.Parse",
+	}
 }
