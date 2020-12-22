@@ -13,9 +13,9 @@ import (
 var tmpl = func() *template.Template {
 	const tmplStr = `package {{.Package}}
 
-func {{.TypeName}}MessageArgs({{.ArgName}} bool) []interface{} {
-	return []interface{}{
-		{{.GetFieldArg}},
+func {{.TypeName}}MessageArgs({{.MethodParameters}}) []interface{} {
+	return []interface{}{{"{"}}{{range .Args}}
+		{{.GetFieldArg}},{{end}}
 	}
 }
 
@@ -47,19 +47,31 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	if len(typesToGenerate) > 1 {
 		return nil, errors.New("only generating for a single type is supported currently")
 	}
+
+	type argTmplVars struct {
+		ArgName     string
+		GetFieldArg string
+	}
+
 	for name, fields := range typesToGenerate {
+		var fieldsArgTmplVarss []argTmplVars
+		for _, field := range fields {
+			fieldsArgTmplVarss = append(fieldsArgTmplVarss, argTmplVars{
+				ArgName:     string(field.FieldName),
+				GetFieldArg: boolFieldArg(string(field.FieldName)),
+			})
+		}
 		var out bytes.Buffer
-		argName := string(fields[0].FieldName)
 		if err := tmpl.Execute(&out, struct {
-			Package     string
-			TypeName    types.TypeName
-			ArgName     string
-			GetFieldArg string
+			Package          string
+			TypeName         types.TypeName
+			MethodParameters string
+			Args             []argTmplVars
 		}{
-			Package:     g.Package,
-			TypeName:    types.TypeName(strings.Title(string(name))),
-			ArgName:     argName,
-			GetFieldArg: boolFieldArg(argName),
+			Package:          g.Package,
+			TypeName:         types.TypeName(strings.Title(string(name))),
+			MethodParameters: methodParametersString(fields),
+			Args:             fieldsArgTmplVarss,
 		}); err != nil {
 			return nil, errors.Wrap(err, "executing template")
 		}
@@ -68,6 +80,15 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		}, nil
 	}
 	return nil, errors.New("should be unreachable")
+}
+
+func methodParametersString(fields types.TypeFields) string {
+	var params []string
+	for _, field := range fields {
+		// TODO(glynternet): support more than bool :joy:
+		params = append(params, string(field.FieldName)+" bool")
+	}
+	return strings.Join(params, ", ")
 }
 
 // TODO(glynternet): upgrade to support receiving bools in UnityOSC so we don't have to do this

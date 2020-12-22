@@ -33,13 +33,21 @@ func TestSingleTypeShouldYieldResult(t *testing.T) {
 		"foo": {{
 			FieldName: "fieldFoo",
 			FieldType: "fieldFooType",
+		}, {
+			FieldName: "fieldBar",
+			FieldType: "fieldBarType",
+		}, {
+			FieldName: "fieldBaz",
+			FieldType: "fieldBazType",
 		}},
 	}
 	const expected = `package packageBar
 
-func FooMessageArgs(fieldFoo bool) []interface{} {
+func FooMessageArgs(fieldFoo bool, fieldBar bool, fieldBaz bool) []interface{} {
 	return []interface{}{
 		boolInt32(fieldFoo),
+		boolInt32(fieldBar),
+		boolInt32(fieldBaz),
 	}
 }
 
