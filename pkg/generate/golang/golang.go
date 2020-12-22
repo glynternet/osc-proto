@@ -3,7 +3,6 @@ package golang
 import (
 	"bytes"
 	"fmt"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -60,13 +59,8 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		Args             []argTmplVars
 	}
 
-	var typeNames []string
-	for name := range typesToGenerate {
-		typeNames = append(typeNames, string(name))
-	}
-	sort.Strings(typeNames)
 	var typeTmplVarss []typeTmplVars
-	for _, name := range typeNames {
+	for _, name := range typesToGenerate.SortedNames() {
 		tName := types.TypeName(name)
 		ttFields := typesToGenerate[tName]
 		var fieldsArgTmplVarss []argTmplVars

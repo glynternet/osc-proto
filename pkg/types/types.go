@@ -8,6 +8,15 @@ import (
 
 type Types map[TypeName]TypeFields
 
+func (ts Types) SortedNames() []string {
+	var names []string
+	for name := range ts {
+		names = append(names, string(name))
+	}
+	sort.Strings(names)
+	return names
+}
+
 type TypeName string
 
 type TypeFields []FieldDefinition
