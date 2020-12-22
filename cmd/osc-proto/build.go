@@ -37,8 +37,14 @@ func generateTypesRun(logger log.Logger) func(_ *cobra.Command, args []string) e
 
 		allFiles := make(map[string][]byte)
 		for _, generator := range []generate.Generator{
-			golang.Generator{Package: "types"},
-			csharp.Generator{Namespace: "types"},
+			golang.Generator{
+				OSCProtoVersion: version,
+				Package:         "types",
+			},
+			csharp.Generator{
+				OSCProtoVersion: version,
+				Namespace:       "types",
+			},
 		} {
 			outFiles, err := generator.Generate(typesDeserialised)
 			if err != nil {
