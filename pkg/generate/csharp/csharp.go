@@ -41,7 +41,7 @@ namespace {{.Namespace}} {
         }
 {{end}}    }
 
-    public class {{.TypeUnmarshaller}} : IMessageUnmarshaller<{{.StructName}}> {
+    public class {{.TypeUnmarshaller}} {
 
 {{range .Fields}}        // <{{.FieldName}}:{{.OriginalFieldType}}>
 {{end}}        public {{.StructName}} Unmarshal(List<object> data) {

@@ -18,7 +18,7 @@ namespace namespaceBar {
         }
     }
 
-    public class FooUnmarshaller : IMessageUnmarshaller<Foo> {
+    public class FooUnmarshaller {
 
         // <fieldFoo:bool>
         public Foo Unmarshal(List<object> data) {

@@ -24,7 +24,7 @@ namespace namespaceBar {
         }
     }
 
-    public class FooUnmarshaller : IMessageUnmarshaller<Foo> {
+    public class FooUnmarshaller {
 
         // <fieldFoo:bool>
         // <fieldBar:int32>
