@@ -15,7 +15,6 @@ import (
 var fileTmpl = func() *template.Template {
 	const tmplStr = `using System;
 using System.Collections.Generic;
-using avvaunity.GOH.Unity.Message.Unmarshaller;
 
 namespace {{.Namespace}} {
 
