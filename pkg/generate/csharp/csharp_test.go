@@ -7,6 +7,7 @@ import (
 	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/generate/csharp"
 	"github.com/glynternet/osc-proto/pkg/generate/generatetest"
+	"github.com/glynternet/osc-proto/pkg/routers"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,6 +81,27 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 	require.NoError(t, err)
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
 		"namespaceBar.cs": testData(t, "multiple_types.cs"),
+	}, out)
+}
+
+func TestSingleTypeSingleFieldSingleRouterShouldYieldResult(t *testing.T) {
+	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(generate.Definitions{
+		Types: types.Types{
+			"foo": {{
+				FieldName: "fieldFoo",
+				FieldType: "bool",
+			}},
+		},
+		Routers: map[routers.RouterName]routers.Routes{
+			"bar": {
+				"baz":   "foo",
+				"whoop": "foo",
+			},
+		},
+	})
+	require.NoError(t, err)
+	generatetest.AssertEqualContentLayout(t, map[string][]byte{
+		"namespaceBar.cs": testData(t, "single_type_with_single_router.cs"),
 	}, out)
 }
 

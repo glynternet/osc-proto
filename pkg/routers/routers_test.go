@@ -3,6 +3,7 @@ package routers
 import (
 	"testing"
 
+	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )
@@ -10,16 +11,22 @@ import (
 func TestRoutersYAMLAPI(t *testing.T) {
 	in := `---
 foo:
-  - bar
-  - baz
+  bar: barType
+  baz: bazType
 woop:
-  - shoop
-  - doop
+  shoop: shoopType
+  doop: doopType
 `
 
 	expected := Routers{
-		"foo":  []string{"bar", "baz"},
-		"woop": []string{"shoop", "doop"},
+		"foo": map[RouteName]types.TypeName{
+			"bar": types.TypeName("barType"),
+			"baz": types.TypeName("bazType"),
+		},
+		"woop": map[RouteName]types.TypeName{
+			"shoop": types.TypeName("shoopType"),
+			"doop":  types.TypeName("doopType"),
+		},
 	}
 
 	var out Routers
