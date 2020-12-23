@@ -2,7 +2,6 @@ package csharp
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"text/template"
 
@@ -90,15 +89,28 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	var ttvs []typeTemplateVars
 	for _, name := range typesToGenerate.SortedNames() {
 		var ftvs []fieldTemplateVars
-		fields := typesToGenerate[types.TypeName(name)]
+		typeName := types.TypeName(name)
+		fields := typesToGenerate[typeName]
 		for _, field := range fields {
 			convertedType, ok := convertedFieldTypes[field.FieldType]
 			if !ok {
-				return nil, fmt.Errorf("type:%s has unsupported field type:%s for field:%s", name, field.FieldType, field.FieldName)
+				return nil, types.TypeError{
+					TypeName: typeName,
+					Err: types.UnsupportedFieldType{
+						FieldType: field.FieldType,
+						FieldName: field.FieldName,
+					},
+				}
 			}
 			parseFieldFunc, ok := parseDataFieldFuncs[field.FieldType]
 			if !ok {
-				return nil, fmt.Errorf("type:%s has unsupported field type:%s for field:%s", name, field.FieldType, field.FieldName)
+				return nil, types.TypeError{
+					TypeName: typeName,
+					Err: types.UnsupportedFieldType{
+						FieldType: field.FieldType,
+						FieldName: field.FieldName,
+					},
+				}
 			}
 			ftvs = append(ftvs, fieldTemplateVars{
 				FieldName:          field.FieldName,

@@ -112,7 +112,7 @@ func interfaceSliceElements(fields types.TypeFields) (string, error) {
 	for _, field := range fields {
 		arg, ok := fieldArgFuncs[field.FieldType]
 		if !ok {
-			return "", unsupportedFieldType{
+			return "", types.UnsupportedFieldType{
 				FieldType: field.FieldType,
 				FieldName: field.FieldName,
 			}
@@ -120,13 +120,4 @@ func interfaceSliceElements(fields types.TypeFields) (string, error) {
 		args = append(args, arg(string(field.FieldName))+",")
 	}
 	return "\n\t\t" + strings.Join(args, "\n\t\t") + "\n\t", nil
-}
-
-type unsupportedFieldType struct {
-	types.FieldType
-	types.FieldName
-}
-
-func (u unsupportedFieldType) Error() string {
-	return fmt.Sprintf("unsupported field type:%s for field:%s", u.FieldType, u.FieldName)
 }
