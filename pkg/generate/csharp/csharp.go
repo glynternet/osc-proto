@@ -84,25 +84,14 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 		Fields                          []fieldTemplateVars
 	}
 
-	convertedFieldTypes := convertedFieldTypes()
-	parseDataFieldFuncs := parseDataFieldFuncs()
+	typeConversions := typeConversions()
 	var ttvs []typeTemplateVars
 	for _, name := range typesToGenerate.SortedNames() {
 		var ftvs []fieldTemplateVars
 		typeName := types.TypeName(name)
 		fields := typesToGenerate[typeName]
 		for _, field := range fields {
-			convertedType, ok := convertedFieldTypes[field.FieldType]
-			if !ok {
-				return nil, types.TypeError{
-					TypeName: typeName,
-					Err: types.UnsupportedFieldType{
-						FieldType: field.FieldType,
-						FieldName: field.FieldName,
-					},
-				}
-			}
-			parseFieldFunc, ok := parseDataFieldFuncs[field.FieldType]
+			conversions, ok := typeConversions[field.FieldType]
 			if !ok {
 				return nil, types.TypeError{
 					TypeName: typeName,
@@ -116,14 +105,14 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 				FieldName:          field.FieldName,
 				FieldNameGetter:    strings.Title(string(field.FieldName)),
 				OriginalFieldType:  field.FieldType,
-				FieldType:          convertedType,
-				FieldTypeParseFunc: parseFieldFunc,
+				FieldType:          conversions.ttype,
+				FieldTypeParseFunc: conversions.parseDataFieldFunc,
 			})
 		}
 
 		ttvs = append(ttvs, typeTemplateVars{
 			TypeName:                        types.TypeName(strings.Title(name)),
-			ConstructorParameters:           constructorParameters(convertedFieldTypes, fields),
+			ConstructorParameters:           constructorParameters(typeConversions, fields),
 			UnmarshalledConstructorCallArgs: unmarshalledConstructorCallArgs(fields),
 			Fields:                          ftvs,
 		})
@@ -150,10 +139,10 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	}, nil
 }
 
-func constructorParameters(convertedFieldTypes map[types.FieldType]string, fields types.TypeFields) string {
+func constructorParameters(conversions map[types.FieldType]typeConversion, fields types.TypeFields) string {
 	var params []string
 	for _, field := range fields {
-		params = append(params, convertedFieldTypes[field.FieldType]+" "+string(field.FieldName))
+		params = append(params, conversions[field.FieldType].ttype+" "+string(field.FieldName))
 	}
 	return strings.Join(params, ", ")
 }
@@ -166,16 +155,20 @@ func unmarshalledConstructorCallArgs(fields types.TypeFields) string {
 	return strings.Join(args, ", ")
 }
 
-func convertedFieldTypes() map[types.FieldType]string {
-	return map[types.FieldType]string{
-		"bool":  "bool",
-		"int32": "int",
-	}
+type typeConversion struct {
+	ttype              string
+	parseDataFieldFunc string
 }
 
-func parseDataFieldFuncs() map[types.FieldType]string {
-	return map[types.FieldType]string{
-		"bool":  "ParseBool",
-		"int32": "int.Parse",
+func typeConversions() map[types.FieldType]typeConversion {
+	return map[types.FieldType]typeConversion{
+		"bool": {
+			ttype:              "bool",
+			parseDataFieldFunc: "ParseBool",
+		},
+		"int32": {
+			ttype:              "int",
+			parseDataFieldFunc: "int.Parse",
+		},
 	}
 }
