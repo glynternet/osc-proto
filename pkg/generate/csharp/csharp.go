@@ -24,7 +24,8 @@ namespace {{.Namespace}} {
 	if err != nil {
 		panic(errors.Wrap(err, "parsing template"))
 	}
-	const typesTmplStr = `
+
+	t, err = t.Parse(`
 {{define "types"}}{{range .}}
     public readonly struct {{.TypeName}} {
 {{range .Fields}}        private readonly {{.FieldType}} _{{.FieldName}};
@@ -59,9 +60,7 @@ namespace {{.Namespace}} {
         }
     }
 {{end}}{{end}}
-`
-
-	t, err = t.Parse(typesTmplStr)
+`)
 	if err != nil {
 		panic(errors.Wrap(err, "parsing types template"))
 	}
@@ -73,27 +72,51 @@ type Generator struct {
 	Namespace       string
 }
 
+type fieldTemplateVars struct {
+	FieldName          types.FieldName
+	FieldNameGetter    string
+	OriginalFieldType  types.FieldType
+	FieldType          string
+	FieldTypeParseFunc string
+}
+
+type typeTemplateVars struct {
+	TypeName                        types.TypeName
+	ConstructorParameters           string
+	UnmarshalledConstructorCallArgs string
+	Fields                          []fieldTemplateVars
+}
+
 func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte, error) {
 	if len(definitions.Types) == 0 {
 		return nil, nil
 	}
-
-	type fieldTemplateVars struct {
-		FieldName          types.FieldName
-		FieldNameGetter    string
-		OriginalFieldType  types.FieldType
-		FieldType          string
-		FieldTypeParseFunc string
+	ttvs, err := generateTypeTemplateVars(definitions, typeConversions())
+	if err != nil {
+		return nil, errors.Wrap(err, "generating typeTemplateVars")
 	}
-
-	type typeTemplateVars struct {
-		TypeName                        types.TypeName
-		ConstructorParameters           string
-		UnmarshalledConstructorCallArgs string
-		Fields                          []fieldTemplateVars
+	version := strings.TrimSpace(g.OSCProtoVersion)
+	if version == "" {
+		version = "unknown"
 	}
+	var out bytes.Buffer
+	if err := fileTmpl.Execute(&out, struct {
+		OSCProtoVersion string
+		Namespace       string
+		Types           []typeTemplateVars
+	}{
+		OSCProtoVersion: version,
+		Namespace:       g.Namespace,
+		Types:           ttvs,
+	}); err != nil {
+		return nil, errors.Wrap(err, "executing template")
+	}
+	return map[string][]byte{
+		g.Namespace + ".cs": out.Bytes(),
+	}, nil
+}
 
-	typeConversions := typeConversions()
+func generateTypeTemplateVars(definitions generate.Definitions, typeConversions map[types.FieldType]typeConversion) ([]typeTemplateVars, error) {
 	var ttvs []typeTemplateVars
 	for _, name := range definitions.Types.SortedNames() {
 		var ftvs []fieldTemplateVars
@@ -125,27 +148,8 @@ func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte
 			UnmarshalledConstructorCallArgs: unmarshalledConstructorCallArgs(fields),
 			Fields:                          ftvs,
 		})
-
 	}
-	version := strings.TrimSpace(g.OSCProtoVersion)
-	if version == "" {
-		version = "unknown"
-	}
-	var out bytes.Buffer
-	if err := fileTmpl.Execute(&out, struct {
-		OSCProtoVersion string
-		Namespace       string
-		Types           []typeTemplateVars
-	}{
-		OSCProtoVersion: version,
-		Namespace:       g.Namespace,
-		Types:           ttvs,
-	}); err != nil {
-		return nil, errors.Wrap(err, "executing template")
-	}
-	return map[string][]byte{
-		g.Namespace + ".cs": out.Bytes(),
-	}, nil
+	return ttvs, nil
 }
 
 func constructorParameters(conversions map[types.FieldType]typeConversion, fields types.TypeFields) string {

@@ -28,7 +28,7 @@ func TestNonboolFieldTypeShouldYieldError(t *testing.T) {
 		}},
 	}
 	_, err := csharp.Generator{Namespace: "foo"}.Generate(generate.Definitions{Types: in})
-	require.EqualError(t, err, "type:foo has error: unsupported field type:nonbool for field:fieldFoo")
+	require.EqualError(t, err, "generating typeTemplateVars: type:foo has error: unsupported field type:nonbool for field:fieldFoo")
 }
 
 func TestSingleTypeSingleFieldShouldYieldResult(t *testing.T) {
