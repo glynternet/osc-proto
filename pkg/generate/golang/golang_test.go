@@ -76,7 +76,6 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 		}},
 	}
 
-	const fooExpected = ``
 	out, err := golang.Generator{
 		Package: "packageName",
 	}.Generate(generate.Definitions{Types: in})
