@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/pkg/errors"
 )
@@ -41,8 +42,8 @@ type Generator struct {
 	Package         string
 }
 
-func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, error) {
-	if len(typesToGenerate) == 0 {
+func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte, error) {
+	if len(definitions.Types) == 0 {
 		return nil, nil
 	}
 
@@ -53,8 +54,8 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 	}
 
 	var typeTmplVarss []typeTmplVars
-	for _, name := range typesToGenerate.SortedNames() {
-		fields := typesToGenerate[types.TypeName(name)]
+	for _, name := range definitions.Types.SortedNames() {
+		fields := definitions.Types[types.TypeName(name)]
 		sliceElements, err := interfaceSliceElements(fields)
 		if err != nil {
 			return nil, errors.Wrapf(err, "generating interface slice elements for type:%s", name)

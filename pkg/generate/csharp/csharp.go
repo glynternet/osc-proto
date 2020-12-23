@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/pkg/errors"
 )
@@ -72,8 +73,8 @@ type Generator struct {
 	Namespace       string
 }
 
-func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, error) {
-	if len(typesToGenerate) == 0 {
+func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte, error) {
+	if len(definitions.Types) == 0 {
 		return nil, nil
 	}
 
@@ -94,10 +95,10 @@ func (g Generator) Generate(typesToGenerate types.Types) (map[string][]byte, err
 
 	typeConversions := typeConversions()
 	var ttvs []typeTemplateVars
-	for _, name := range typesToGenerate.SortedNames() {
+	for _, name := range definitions.Types.SortedNames() {
 		var ftvs []fieldTemplateVars
 		typeName := types.TypeName(name)
-		fields := typesToGenerate[typeName]
+		fields := definitions.Types[typeName]
 		for _, field := range fields {
 			conversions, ok := typeConversions[field.FieldType]
 			if !ok {

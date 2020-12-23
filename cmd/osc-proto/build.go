@@ -8,7 +8,6 @@ import (
 	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/generate/csharp"
 	"github.com/glynternet/osc-proto/pkg/generate/golang"
-	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -30,9 +29,9 @@ func generateTypesRun(logger log.Logger) func(_ *cobra.Command, args []string) e
 		if err != nil {
 			return errors.Wrap(err, "reading types file")
 		}
-		var typesDeserialised types.Types
-		if err := yaml.Unmarshal(typesSerialised, &typesDeserialised); err != nil {
-			return errors.Wrap(err, "deserialising types definition")
+		var definitionsDeserialised generate.Definitions
+		if err := yaml.Unmarshal(typesSerialised, &definitionsDeserialised); err != nil {
+			return errors.Wrap(err, "deserialising definitions")
 		}
 
 		allFiles := make(map[string][]byte)
@@ -46,7 +45,7 @@ func generateTypesRun(logger log.Logger) func(_ *cobra.Command, args []string) e
 				Namespace:       "types",
 			},
 		} {
-			outFiles, err := generator.Generate(typesDeserialised)
+			outFiles, err := generator.Generate(definitionsDeserialised)
 			if err != nil {
 				return errors.Wrap(err, "generating files content for types")
 			}

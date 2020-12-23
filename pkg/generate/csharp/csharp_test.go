@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/generate/csharp"
 	"github.com/glynternet/osc-proto/pkg/generate/generatetest"
 	"github.com/glynternet/osc-proto/pkg/types"
@@ -14,7 +15,7 @@ import (
 func TestEmptyTypesShouldYieldEmptyFile(t *testing.T) {
 	in := types.Types{}
 	var expected map[string][]byte
-	out, err := csharp.Generator{}.Generate(in)
+	out, err := csharp.Generator{}.Generate(generate.Definitions{Types: in})
 	require.NoError(t, err)
 	assert.Equal(t, expected, out)
 }
@@ -26,7 +27,7 @@ func TestNonboolFieldTypeShouldYieldError(t *testing.T) {
 			FieldType: "nonbool",
 		}},
 	}
-	_, err := csharp.Generator{Namespace: "foo"}.Generate(in)
+	_, err := csharp.Generator{Namespace: "foo"}.Generate(generate.Definitions{Types: in})
 	require.EqualError(t, err, "type:foo has error: unsupported field type:nonbool for field:fieldFoo")
 }
 
@@ -37,7 +38,7 @@ func TestSingleTypeSingleFieldShouldYieldResult(t *testing.T) {
 			FieldType: "bool",
 		}},
 	}
-	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(in)
+	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(generate.Definitions{Types: in})
 	require.NoError(t, err)
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
 		"namespaceBar.cs": testData(t, "single_type_single_field.cs"),
@@ -57,7 +58,7 @@ func TestSingleTypeMultipleFieldsShouldYieldResult(t *testing.T) {
 	out, err := csharp.Generator{
 		OSCProtoVersion: "\U0001F9E8",
 		Namespace:       "namespaceBar",
-	}.Generate(in)
+	}.Generate(generate.Definitions{Types: in})
 	require.NoError(t, err)
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
 		"namespaceBar.cs": testData(t, "single_type_multiple_fields.cs"),
@@ -75,7 +76,7 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 			FieldType: "bool",
 		}},
 	}
-	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(in)
+	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(generate.Definitions{Types: in})
 	require.NoError(t, err)
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
 		"namespaceBar.cs": testData(t, "multiple_types.cs"),
