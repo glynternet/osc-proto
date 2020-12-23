@@ -105,6 +105,31 @@ func TestSingleTypeSingleFieldSingleRouterShouldYieldResult(t *testing.T) {
 	}, out)
 }
 
+func TestSingleTypeSingleFieldMultipleRouterShouldYieldResult(t *testing.T) {
+	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(generate.Definitions{
+		Types: types.Types{
+			"foo": {{
+				FieldName: "fieldFoo",
+				FieldType: "bool",
+			}},
+		},
+		Routers: map[routers.RouterName]routers.Routes{
+			"bar": {
+				"baz":   "foo",
+				"whoop": "foo",
+			},
+			"baz": {
+				"baz":   "foo",
+				"whoop": "foo",
+			},
+		},
+	})
+	require.NoError(t, err)
+	generatetest.AssertEqualContentLayout(t, map[string][]byte{
+		"namespaceBar.cs": testData(t, "single_type_with_multiple_routers.cs"),
+	}, out)
+}
+
 func testData(t *testing.T, filename string) []byte {
 	expected, err := ioutil.ReadFile("testdata/" + filename)
 	require.NoError(t, err)
