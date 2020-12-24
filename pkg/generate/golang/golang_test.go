@@ -27,7 +27,7 @@ func TestUnsupportedFieldTypeShouldReturnError(t *testing.T) {
 			FieldType: "nope",
 		}},
 	}})
-	require.EqualError(t, err, "generating interface slice elements for type:foo: unsupported field type:nope for field:fieldFoo")
+	require.EqualError(t, err, "generating typeTmplVars: generating interface slice elements for type:foo: unsupported field type:nope for field:fieldFoo")
 }
 
 func TestVersionCommentShouldBePopulated(t *testing.T) {

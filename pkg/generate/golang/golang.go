@@ -47,24 +47,9 @@ func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte
 		return nil, nil
 	}
 
-	type typeTmplVars struct {
-		TypeName               types.TypeName
-		MethodParameters       string
-		InterfaceSliceElements string
-	}
-
-	var typeTmplVarss []typeTmplVars
-	for _, name := range definitions.Types.SortedNames() {
-		fields := definitions.Types[types.TypeName(name)]
-		sliceElements, err := interfaceSliceElements(fields)
-		if err != nil {
-			return nil, errors.Wrapf(err, "generating interface slice elements for type:%s", name)
-		}
-		typeTmplVarss = append(typeTmplVarss, typeTmplVars{
-			TypeName:               types.TypeName(strings.Title(name)),
-			MethodParameters:       methodParametersString(fields),
-			InterfaceSliceElements: sliceElements,
-		})
+	typeTmplVarss, err := generateTypeTmplVars(definitions)
+	if err != nil {
+		return nil, errors.Wrap(err, "generating typeTmplVars")
 	}
 
 	var out bytes.Buffer
@@ -85,6 +70,29 @@ func (g Generator) Generate(definitions generate.Definitions) (map[string][]byte
 	}
 
 	return map[string][]byte{g.Package + ".go": out.Bytes()}, nil
+}
+
+type typeTmplVars struct {
+	TypeName               types.TypeName
+	MethodParameters       string
+	InterfaceSliceElements string
+}
+
+func generateTypeTmplVars(definitions generate.Definitions) ([]typeTmplVars, error) {
+	var typeTmplVarss []typeTmplVars
+	for _, name := range definitions.Types.SortedNames() {
+		fields := definitions.Types[types.TypeName(name)]
+		sliceElements, err := interfaceSliceElements(fields)
+		if err != nil {
+			return nil, errors.Wrapf(err, "generating interface slice elements for type:%s", name)
+		}
+		typeTmplVarss = append(typeTmplVarss, typeTmplVars{
+			TypeName:               types.TypeName(strings.Title(name)),
+			MethodParameters:       methodParametersString(fields),
+			InterfaceSliceElements: sliceElements,
+		})
+	}
+	return typeTmplVarss, nil
 }
 
 func methodParametersString(fields types.TypeFields) string {
