@@ -8,10 +8,12 @@ namespace namespaceBar {
     public readonly struct Foo {
         private readonly bool _fieldFoo;
         private readonly int _fieldBar;
+        private readonly string _fieldString;
 
-        public Foo(bool fieldFoo, int fieldBar) {
+        public Foo(bool fieldFoo, int fieldBar, string fieldString) {
             _fieldFoo = fieldFoo;
             _fieldBar = fieldBar;
+            _fieldString = fieldString;
         }
 
         public bool FieldFoo() {
@@ -21,19 +23,25 @@ namespace namespaceBar {
         public int FieldBar() {
             return _fieldBar;
         }
+
+        public string FieldString() {
+            return _fieldString;
+        }
     }
 
     public class FooUnmarshaller {
 
         // <fieldFoo:bool>
         // <fieldBar:int32>
+        // <fieldString:string>
         public Foo Unmarshal(List<object> data) {
-            if (data.Count != 2) {
-                throw new ArgumentException($"Expected 2 item in arg list but got {data.Count}");
+            if (data.Count != 3) {
+                throw new ArgumentException($"Expected 3 item in arg list but got {data.Count}");
             }
             var fieldFoo = ParseBool(data[0].ToString());
             var fieldBar = int.Parse(data[1].ToString());
-            return new Foo(fieldFoo, fieldBar);
+            var fieldString = (data[2].ToString());
+            return new Foo(fieldFoo, fieldBar, fieldString);
         }
 
         private static bool ParseBool(string value) {

@@ -332,6 +332,12 @@ func typeConversions() map[types.FieldType]typeConversion {
 			ttype:              "int",
 			parseDataFieldFunc: "int.Parse",
 		},
+		"string": {
+			ttype: "string",
+			// having an empty string should yield parenthesis around the value,
+			// which is ugly but should still be compilable and correct.
+			parseDataFieldFunc: "",
+		},
 	}
 }
 

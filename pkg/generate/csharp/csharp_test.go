@@ -54,6 +54,9 @@ func TestSingleTypeMultipleFieldsShouldYieldResult(t *testing.T) {
 		}, {
 			FieldName: "fieldBar",
 			FieldType: "int32",
+		}, {
+			FieldName: "fieldString",
+			FieldType: "string",
 		}},
 	}
 	out, err := csharp.Generator{
