@@ -72,8 +72,11 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 	in := types.Types{
 		"foo": {},
 		"bar": {{
-			FieldName: "fieldBar",
+			FieldName: "fieldBool",
 			FieldType: "bool",
+		}, {
+			FieldName: "fieldInt32",
+			FieldType: "int32",
 		}},
 	}
 
