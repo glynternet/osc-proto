@@ -7,6 +7,7 @@ import (
 	"github.com/glynternet/osc-proto/pkg/generate"
 	"github.com/glynternet/osc-proto/pkg/generate/generatetest"
 	"github.com/glynternet/osc-proto/pkg/generate/golang"
+	"github.com/glynternet/osc-proto/pkg/routers"
 	"github.com/glynternet/osc-proto/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,6 +84,39 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
 		"packageName.go": testData(t, "multiple_types.go"),
 	}, out)
+}
+
+func TestSingleTypeSingleFieldSingleRouterShouldYieldResult(t *testing.T) {
+	out, err := golang.Generator{Package: "packageBar"}.Generate(generate.Definitions{
+		Types: types.Types{
+			"foo": {{
+				FieldName: "fieldFoo",
+				FieldType: "bool",
+			}},
+		},
+		Routers: map[routers.RouterName]routers.Routes{
+			"bar": {
+				"baz":   "foo",
+				"whoop": "foo",
+			},
+		},
+	})
+	require.NoError(t, err)
+	generatetest.AssertEqualContentLayout(t, map[string][]byte{
+		"packageBar.go": testData(t, "single_type_with_single_router.go"),
+	}, out)
+}
+
+func TestRouteReferencingUnknownTypeShouldError(t *testing.T) {
+	_, err := golang.Generator{Package: "packageBar"}.Generate(generate.Definitions{
+		Types: types.Types{"foo": {}},
+		Routers: map[routers.RouterName]routers.Routes{
+			"bar": {
+				"baz": "nope",
+			},
+		},
+	})
+	require.EqualError(t, err, "generating route messages: cannot find fields for type:nope in router:bar route:baz")
 }
 
 func testData(t *testing.T, filename string) []byte {
