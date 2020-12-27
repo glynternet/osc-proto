@@ -107,11 +107,15 @@ func TestSingleTypeSingleFieldSingleRouterShouldYieldResult(t *testing.T) {
 	}, out)
 }
 
-func TestSingleTypeSingleFieldMultipleRoutersShouldYieldResult(t *testing.T) {
+func TestMultipleRoutersShouldYieldResult(t *testing.T) {
 	out, err := golang.Generator{Package: "packageBar"}.Generate(generate.Definitions{
 		Types: types.Types{
 			"foo": {{
 				FieldName: "fieldFoo",
+				FieldType: "bool",
+			}},
+			"bar": {{
+				FieldName: "fieldBar",
 				FieldType: "bool",
 			}},
 		},
@@ -120,13 +124,13 @@ func TestSingleTypeSingleFieldMultipleRoutersShouldYieldResult(t *testing.T) {
 				"whoop": "foo",
 			},
 			"baz": {
-				"whoop": "foo",
+				"whoop": "bar",
 			},
 		},
 	})
 	require.NoError(t, err)
 	generatetest.AssertEqualContentLayout(t, map[string][]byte{
-		"packageBar.go": testData(t, "single_type_with_multiple_routers.go"),
+		"packageBar.go": testData(t, "multiple_routers.go"),
 	}, out)
 }
 
