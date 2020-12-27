@@ -25,7 +25,7 @@ func {{.TypeName}}MessageArgs({{.MessageArgsFunctionParameters}}) []interface{} 
 {{end}}{{range .RouteMessages}}
 func {{.ID}}{{.ArgType}}({{.MessageArgsFunctionParameters}}) *osc.Message {
 	return &osc.Message{
-		Address:   "/bar",
+		Address:   "{{.OSCAddress}}",
 		Arguments: append([]interface{}{{"{"}}"{{.Name}}"{{"}"}}, FooMessageArgs(fieldFoo)...),
 	}
 }
@@ -97,6 +97,7 @@ type typeTmplVars struct {
 type routeTmplVars struct {
 	ID                            string
 	Name                          string
+	OSCAddress                    string
 	ArgType                       string
 	MessageArgsFunctionParameters string
 }
@@ -123,18 +124,19 @@ func generateRouteTmplVars(definitions generate.Definitions) ([]routeTmplVars, e
 		return nil, nil
 	}
 	var rms []routeTmplVars
-	for name, routes := range definitions.Routers {
+	for routerName, routes := range definitions.Routers {
 		for _, routeName := range routes.SortedNames() {
 			argTypeName := routes[routers.RouteName(routeName)]
 			argFields, ok := definitions.Types[argTypeName]
 			if !ok {
-				return nil, fmt.Errorf("cannot find fields for type:%s in router:%s route:%s", argTypeName, name, routeName)
+				return nil, fmt.Errorf("cannot find fields for type:%s in router:%s route:%s", argTypeName, routerName, routeName)
 			}
 			rms = append(rms, routeTmplVars{
-				ID:                            strings.Title(string(name)) + strings.Title(routeName),
+				ID:                            strings.Title(string(routerName)) + strings.Title(routeName),
+				Name:                          routeName,
+				OSCAddress:                    "/" + string(routerName),
 				ArgType:                       strings.Title(string(argTypeName)),
 				MessageArgsFunctionParameters: messageArgsFunctionParameters(argFields),
-				Name:                          routeName,
 			})
 		}
 	}

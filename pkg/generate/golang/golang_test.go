@@ -107,6 +107,29 @@ func TestSingleTypeSingleFieldSingleRouterShouldYieldResult(t *testing.T) {
 	}, out)
 }
 
+func TestSingleTypeSingleFieldMultipleRoutersShouldYieldResult(t *testing.T) {
+	out, err := golang.Generator{Package: "packageBar"}.Generate(generate.Definitions{
+		Types: types.Types{
+			"foo": {{
+				FieldName: "fieldFoo",
+				FieldType: "bool",
+			}},
+		},
+		Routers: map[routers.RouterName]routers.Routes{
+			"bar": {
+				"whoop": "foo",
+			},
+			"baz": {
+				"whoop": "foo",
+			},
+		},
+	})
+	require.NoError(t, err)
+	generatetest.AssertEqualContentLayout(t, map[string][]byte{
+		"packageBar.go": testData(t, "single_type_with_multiple_routers.go"),
+	}, out)
+}
+
 func TestRouteReferencingUnknownTypeShouldError(t *testing.T) {
 	_, err := golang.Generator{Package: "packageBar"}.Generate(generate.Definitions{
 		Types: types.Types{"foo": {}},
