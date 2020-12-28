@@ -338,6 +338,10 @@ func typeConversions() map[types.FieldType]typeConversion {
 			// which is ugly but should still be compilable and correct.
 			parseDataFieldFunc: "",
 		},
+		"float32": {
+			ttype:              "float",
+			parseDataFieldFunc: "float.Parse",
+		},
 	}
 }
 

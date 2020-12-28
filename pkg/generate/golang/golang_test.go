@@ -80,6 +80,9 @@ func TestMultipleTypesShouldYieldResult(t *testing.T) {
 		}, {
 			FieldName: "fieldString",
 			FieldType: "string",
+		}, {
+			FieldName: "fieldFloat32",
+			FieldType: "float32",
 		}},
 	}
 

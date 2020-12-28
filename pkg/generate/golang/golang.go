@@ -174,9 +174,10 @@ func fieldArgFuncs() map[types.FieldType]func(string) string {
 	return map[types.FieldType]func(string) string{
 		// TODO(glynternet): upgrade to support receiving bools in UnityOSC
 		//   so we don't have to do this as a boolInt32
-		"bool":   func(argName string) string { return fmt.Sprintf("boolInt32(%s)", argName) },
-		"int32":  func(argName string) string { return argName },
-		"string": func(argName string) string { return argName },
+		"bool":    func(argName string) string { return fmt.Sprintf("boolInt32(%s)", argName) },
+		"float32": func(argName string) string { return argName },
+		"int32":   func(argName string) string { return argName },
+		"string":  func(argName string) string { return argName },
 	}
 }
 
