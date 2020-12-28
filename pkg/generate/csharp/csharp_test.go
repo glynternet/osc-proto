@@ -21,6 +21,17 @@ func TestEmptyTypesShouldYieldEmptyFile(t *testing.T) {
 	assert.Equal(t, expected, out)
 }
 
+func TestNoFieldsTypeShouldYieldCorrectEmptyStruct(t *testing.T) {
+	in := types.Types{
+		"bar": {},
+	}
+	out, err := csharp.Generator{Namespace: "namespaceBar"}.Generate(generate.Definitions{Types: in})
+	require.NoError(t, err)
+	generatetest.AssertEqualContentLayout(t, map[string][]byte{
+		"namespaceBar.cs": testData(t, "type_with_no_fields.cs"),
+	}, out)
+}
+
 func TestNonboolFieldTypeShouldYieldError(t *testing.T) {
 	in := types.Types{
 		"foo": {{

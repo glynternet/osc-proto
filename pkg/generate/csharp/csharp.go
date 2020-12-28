@@ -28,7 +28,7 @@ namespace {{.Namespace}} {
 
 	t, err = t.Parse(`
 {{define "types"}}{{range .}}
-    public readonly struct {{.StructName}} {
+    public readonly struct {{.StructName}} {{"{"}}{{if .Fields}}
 {{range .Fields}}        private readonly {{.FieldType}} _{{.FieldName}};
 {{end}}
         public {{.StructName}}({{.ConstructorParameters}}) {
@@ -38,7 +38,7 @@ namespace {{.Namespace}} {
         public {{.FieldType}} {{.FieldNameGetter}}() {
             return _{{.FieldName}};
         }
-{{end}}    }
+{{end}}    {{end}}{{"}"}}
 
     public class {{.TypeUnmarshaller}} {
 
