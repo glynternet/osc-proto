@@ -23,8 +23,8 @@ func {{.MessageArgsConstructorFuncName}}({{.MessageArgsFunctionParameters}}) []i
 	return []interface{}{{"{"}}{{.InterfaceSliceElements}}{{"}"}}
 }
 {{end}}{{range .RouteMessages}}
-func {{.ID}}{{.ArgType}}({{.MessageArgsFunctionParameters}}) *osc.Message {
-	return &osc.Message{
+func {{.ID}}{{.ArgType}}({{.MessageArgsFunctionParameters}}) osc.Message {
+	return osc.Message{
 		Address:   "{{.OSCAddress}}",
 		Arguments: append([]interface{}{{"{"}}"{{.Name}}"{{"}"}}, {{.MessageArgsConstructorFuncName}}({{.MessageArgsConstructorCallArgs}})...),
 	}

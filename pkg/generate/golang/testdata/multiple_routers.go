@@ -16,15 +16,15 @@ func FooMessageArgs(fieldFoo bool) []interface{} {
 	}
 }
 
-func BarWhoopFoo(fieldFoo bool) *osc.Message {
-	return &osc.Message{
+func BarWhoopFoo(fieldFoo bool) osc.Message {
+	return osc.Message{
 		Address:   "/bar",
 		Arguments: append([]interface{}{"whoop"}, FooMessageArgs(fieldFoo)...),
 	}
 }
 
-func BazWhoopBar(fieldBar bool) *osc.Message {
-	return &osc.Message{
+func BazWhoopBar(fieldBar bool) osc.Message {
+	return osc.Message{
 		Address:   "/baz",
 		Arguments: append([]interface{}{"whoop"}, BarMessageArgs(fieldBar)...),
 	}
