@@ -67,7 +67,11 @@ namespace {{.Namespace}} {
 	}
 
 	t, err = t.Parse(`
-{{define "routers"}}{{range .}}
+{{define "routers"}}{{if .}}
+    public interface IMessageHandler {
+        void Handle(List<object> messageArgs);
+    }
+{{end}}{{range .}}
     public class {{.RouterName}} : IMessageHandler {
 {{range .Unmarshallers}}        {{.}}
 {{end}}

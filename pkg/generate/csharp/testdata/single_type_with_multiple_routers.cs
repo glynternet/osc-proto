@@ -38,6 +38,10 @@ namespace namespaceBar {
         }
     }
 
+    public interface IMessageHandler {
+        void Handle(List<object> messageArgs);
+    }
+
     public class BarRouter : IMessageHandler {
         private static readonly FooUnmarshaller BazFooUnmarshaller = new FooUnmarshaller();
         private static readonly FooUnmarshaller WhoopFooUnmarshaller = new FooUnmarshaller();
