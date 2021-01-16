@@ -23,7 +23,7 @@ func {{.MessageArgsConstructorFuncName}}({{.MessageArgsFunctionParameters}}) []i
 	return []interface{}{{"{"}}{{.InterfaceSliceElements}}{{"}"}}
 }
 {{end}}{{range .RouteMessages}}
-func {{.ID}}{{.ArgType}}({{.MessageArgsFunctionParameters}}) osc.Message {
+func {{.ID}}({{.MessageArgsFunctionParameters}}) osc.Message {
 	return osc.Message{
 		Address:   "{{.OSCAddress}}",
 		Arguments: append([]interface{}{{"{"}}"{{.Name}}"{{"}"}}, {{.MessageArgsConstructorFuncName}}({{.MessageArgsConstructorCallArgs}})...),
@@ -98,7 +98,6 @@ type routeTmplVars struct {
 	ID                             string
 	Name                           string
 	OSCAddress                     string
-	ArgType                        string
 	MessageArgsFunctionParameters  string
 	MessageArgsConstructorFuncName string
 	MessageArgsConstructorCallArgs string
@@ -140,7 +139,6 @@ func generateRouteTmplVars(definitions generate.Definitions) ([]routeTmplVars, e
 				ID:                             strings.Title(string(routerName)) + strings.Title(routeName),
 				Name:                           routeName,
 				OSCAddress:                     "/" + string(routerName),
-				ArgType:                        strings.Title(string(argTypeName)),
 				MessageArgsFunctionParameters:  messageArgsFunctionParameters(argFields),
 				MessageArgsConstructorFuncName: messageArgsConstructorFuncName(argTypeName),
 				MessageArgsConstructorCallArgs: messageArgsConstructorCallArgs(argFields),
