@@ -58,10 +58,10 @@ namespace namespaceBar {
             var route = data[0].ToString();
             switch (route) {
                 case "baz":
-                    _barHandler.HandleBazFoo(BazFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
+                    _barHandler.HandleBaz(BazFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
                     break;
                 case "whoop":
-                    _barHandler.HandleWhoopFoo(WhoopFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
+                    _barHandler.HandleWhoop(WhoopFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("route", route, "Unsupported message routing arg");
@@ -70,8 +70,8 @@ namespace namespaceBar {
     }
 
     public interface IBarHandler {
-        void HandleBazFoo(Foo foo);
-        void HandleWhoopFoo(Foo foo);
+        void HandleBaz(Foo foo);
+        void HandleWhoop(Foo foo);
     }
 
     public class BazRouter : IMessageHandler {
@@ -90,10 +90,10 @@ namespace namespaceBar {
             var route = data[0].ToString();
             switch (route) {
                 case "baz":
-                    _bazHandler.HandleBazFoo(BazFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
+                    _bazHandler.HandleBaz(BazFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
                     break;
                 case "whoop":
-                    _bazHandler.HandleWhoopFoo(WhoopFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
+                    _bazHandler.HandleWhoop(WhoopFooUnmarshaller.Unmarshal(data.GetRange(1, data.Count - 1)));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("route", route, "Unsupported message routing arg");
@@ -102,7 +102,7 @@ namespace namespaceBar {
     }
 
     public interface IBazHandler {
-        void HandleBazFoo(Foo foo);
-        void HandleWhoopFoo(Foo foo);
+        void HandleBaz(Foo foo);
+        void HandleWhoop(Foo foo);
     }
 }

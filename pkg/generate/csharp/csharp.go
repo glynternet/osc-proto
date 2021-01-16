@@ -224,7 +224,7 @@ func generateRouterTemplateVars(definitions generate.Definitions) ([]routerTempl
 			Unmarshallers:               routerUnmarshallers(routes),
 			RouteHandlers:               routerRouteHandlers(routes),
 			RouteCases:                  routerRouteCases(routerName, routes),
-			HandlerInterfaceMethods:     routerHandlerInterfaceMethods(routerName, routes),
+			HandlerInterfaceMethods:     routerHandlerInterfaceMethods(routes),
 		})
 	}
 	return tvs, nil
@@ -280,20 +280,19 @@ func routerRouteCases(routerName router, routes routers.Routes) []string {
                     break;`,
 			routeName,
 			routerName.HandlerVar(),
-			"Handle"+strings.Title(routeName)+routeArg.StructName(),
+			"Handle"+strings.Title(routeName),
 			routeArgsUnmarshallerVar(routeName, routeArg)),
 		)
 	}
 	return us
 }
 
-func routerHandlerInterfaceMethods(routerName router, routes routers.Routes) []string {
+func routerHandlerInterfaceMethods(routes routers.Routes) []string {
 	var ms []string
 	for _, routeName := range routes.SortedNames() {
 		routeArg := arg(routes[routers.RouteName(routeName)])
-		ms = append(ms, fmt.Sprintf(`void Handle%s%s(%s %s);`,
+		ms = append(ms, fmt.Sprintf(`void Handle%s(%s %s);`,
 			strings.Title(routeName),
-			routeArg.StructName(),
 			routeArg.StructName(),
 			routeArg,
 		))
