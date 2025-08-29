@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/glynternet/pkg v0.0.2
+	github.com/hypebeast/go-osc v0.0.0-20220308234300-cec5a8a1e5f5
 	github.com/magiconair/properties v1.8.1
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v1.1.1

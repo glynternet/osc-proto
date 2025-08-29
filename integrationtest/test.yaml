@@ -1,0 +1,80 @@
+# Comprehensive integration test definition showcasing all osc-proto features
+enums:
+  # Multi-value enum
+  LogLevel:
+    values:
+      - DEBUG
+      - INFO
+      - WARN  
+      - ERROR
+  
+  # Binary enum
+  PowerState:
+    values:
+      - ON
+      - OFF
+  
+  # Direction enum with many values
+  Direction:
+    values:
+      - NORTH
+      - SOUTH
+      - EAST
+      - WEST
+      - UP
+      - DOWN
+
+types:
+  # Type with no fields (empty)
+  EmptyMessage: []
+  
+  # Type with single primitive field
+  SimpleMessage:
+    - value: string
+  
+  # Type with single enum field
+  PowerCommand:
+    - state: PowerState
+  
+  # Type with multiple primitive fields (all types)
+  ComplexMessage:
+    - enabled: bool
+    - count: int32
+    - position: float32
+    - name: string
+  
+  # Type mixing primitives and enums
+  LogEntry:
+    - level: LogLevel
+    - message: string
+    - timestamp: int32
+    - enabled: bool
+  
+  # Type with multiple enum fields
+  MovementCommand:
+    - direction: Direction
+    - power: PowerState
+    - speed: float32
+
+routers:
+  # Router with no-arg route
+  system:
+    ping: EmptyMessage
+    status: EmptyMessage
+  
+  # Router with single-arg routes
+  simple:
+    echo: SimpleMessage
+    power: PowerCommand
+  
+  # Router with multi-arg routes
+  game:
+    log: LogEntry
+    move: MovementCommand
+    update: ComplexMessage
+  
+  # Router mixing different message types
+  mixed:
+    empty: EmptyMessage
+    simple: SimpleMessage
+    complex: LogEntry

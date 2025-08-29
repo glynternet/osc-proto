@@ -11,5 +11,6 @@ type Generator interface {
 
 type Definitions struct {
 	Types   types.Types     `yaml:"types"`
+	Enums   types.Enums     `yaml:"enums"`
 	Routers routers.Routers `yaml:"routers"`
 }

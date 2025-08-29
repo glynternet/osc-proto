@@ -147,6 +147,68 @@ func TestSingleTypeSingleFieldMultipleRouterShouldYieldResult(t *testing.T) {
 	}, out)
 }
 
+func TestEnumGeneration(t *testing.T) {
+	out, err := csharp.Generator{Namespace: "TestNamespace"}.Generate(generate.Definitions{
+		Enums: types.Enums{
+			"LogLevel": types.EnumDefinition{
+				Values: []types.EnumValue{"DEBUG", "INFO", "ERROR"},
+			},
+		},
+		Types: types.Types{
+			"LogMessage": types.TypeFields{{
+				FieldName: "level",
+				FieldType: "LogLevel",
+			}},
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, out, 1)
+	
+	content := string(out["TestNamespace.cs"])
+	assert.Contains(t, content, "public enum LogLevel {")
+	assert.Contains(t, content, "DEBUG = 0,")
+	assert.Contains(t, content, "INFO = 1,")
+	assert.Contains(t, content, "ERROR = 2")
+	assert.Contains(t, content, "public static class LogLevelExtensions")
+	assert.Contains(t, content, "public static LogLevel ParseLogLevel(string value)")
+	assert.Contains(t, content, "LogLevelExtensions.ParseLogLevel")
+}
+
+func TestEmptyEnumsAndTypesShouldYieldNil(t *testing.T) {
+	out, err := csharp.Generator{}.Generate(generate.Definitions{})
+	require.NoError(t, err)
+	assert.Nil(t, out)
+}
+
+func TestEnumFieldInRouter(t *testing.T) {
+	out, err := csharp.Generator{Namespace: "Test"}.Generate(generate.Definitions{
+		Enums: types.Enums{
+			"PlayerState": types.EnumDefinition{
+				Values: []types.EnumValue{"IDLE", "RUNNING"},
+			},
+		},
+		Types: types.Types{
+			"Player": types.TypeFields{{
+				FieldName: "state",
+				FieldType: "PlayerState",
+			}},
+		},
+		Routers: map[routers.RouterName]routers.Routes{
+			"game": {
+				"updatePlayer": "Player",
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, out, 1)
+	
+	content := string(out["Test.cs"])
+	assert.Contains(t, content, "void HandleUpdatePlayer(Player Player)")
+	assert.Contains(t, content, "private readonly PlayerState _state")
+	assert.Contains(t, content, "public Player(PlayerState state)")
+	assert.Contains(t, content, "PlayerStateExtensions.ParsePlayerState")
+}
+
 func testData(t *testing.T, filename string) []byte {
 	expected, err := ioutil.ReadFile("testdata/" + filename)
 	require.NoError(t, err)
